@@ -3,21 +3,41 @@
 #-}
 
 module Syntax where
-    newtype Location = Location Int deriving (Eq, Ord, Num)
-    instance Show Location where
-        show (Location n) = 'a' : (show n)
+import qualified Data.Map as Map
 
-    newtype Variable = Variable Int deriving (Eq, Ord, Num)
-    instance Show Variable where
-        show (Variable n) = 'a' : (show n)
+newtype Location = Location Int deriving (Eq, Ord, Num)
+instance Show Location where
+    show (Location n) = 'l' : (show n)
 
-    data Expression = NilE 
+newtype Variable = Variable Int deriving (Eq, Ord, Num)
+instance Show Variable where
+    show (Variable n) = 'v' : (show n)
+
+newtype Ann = Ann Int deriving (Eq, Ord, Num, Enum)
+instance Show Ann where
+    show (Ann n) = 'a' : (show n)
+
+type VariableT = String 
+data Expression = NilE 
      | ConstE Int
-     | VarE Variable
-     | LambdaE Variable Expression 
-     | AppE Expression Location
-     | LetE Variable Expression Expression
-     | ConsE Variable Variable
-     | LetconsE Variable Expression Expression
+     | VarE VariableT
+     | LambdaE VariableT Expression 
+     | AppE Expression VariableT
+     | LetE VariableT Expression Expression
+     | ConsE VariableT VariableT
+     | LetconsE VariableT Expression Expression
      | MatchE Expression Expression Expression Expression Expression
      deriving(Show)
+
+data Type a = Prim  
+     | VarT VariableT
+     | Func (Type a) (Type a) a 
+     | Thunk (Type a) a
+     | List (Type a) a [a]
+     deriving(Eq, Show)
+
+type HMType = Type () -- Hinldey Milner Types without annotations
+type AnnType = Type Ann -- Annotated types
+
+
+    

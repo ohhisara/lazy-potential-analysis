@@ -1,0 +1,21 @@
+name:                annotated-potential-type-system
+version:             0.0
+
+dependencies:
+- base >= 4.7 && < 5
+- mtl
+- transformers
+- containers
+- glpk-hs
+- gasp
+
+executables:
+  runanalysis:
+    main:                Anal.hs
+    source-dirs:         .
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -W
+    
+
