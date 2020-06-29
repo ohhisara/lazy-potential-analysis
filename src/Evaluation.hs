@@ -61,7 +61,6 @@ module Evaluation where
      | s == x = LetconsE (show l) (replaceVar s l e1) (replaceVar s l e2)
      | otherwise = LetconsE x (replaceVar s l e1) (replaceVar s l e2)    
     replaceVar s l (MatchE e0 e1 e2 e3 e4) = MatchE (replaceVar s l e0) (replaceVar s l e1) (replaceVar s l e2) (replaceVar s l e3) (replaceVar s l e4)
-    --replaceVar s l e = error ("Non-exaustive"++(show s)++(show l)++(show e))
 
     boundVars:: Expression -> BoundSet
     boundVars (LambdaE x lambda) = x:(boundVars lambda)
@@ -72,10 +71,7 @@ module Evaluation where
     boundVars _ = []
 
     varToLoc::VariableT -> Location 
-    --varToLoc v | trace ("Var to loc"++(show v)) False = undefined
-    varToLoc v 
-        | (head v) == 'l' = Location (read (tail v))
-        | otherwise = (Location 777)
+    varToLoc v = Location (read (tail v))
 
     eval::Expression -> BoundSet ->EvalState Expression 
     eval e s | trace (show e) False = undefined
@@ -88,7 +84,6 @@ module Evaluation where
         state <- get 
         case Map.lookup (varToLoc v) (heap state) of 
             Just e -> do
-                --addToLocations (varToLoc v)
                 w <- eval e b
                 addToHeap (varToLoc v) w 
                 return w
@@ -98,13 +93,11 @@ module Evaluation where
         newL <- freshLocation
         addToHeap newL (replaceVar x newL e1)
         eval (replaceVar x newL e2) b 
-        --return w 
 
     eval (LetconsE x (ConsE xh xt) e1) b = do 
         newL <- freshLocation
         addToHeap newL (replaceVar x newL (ConsE xh xt))
         eval (replaceVar x newL e1) b 
-        --return w
 
     eval (AppE e l) b = do
         w <- eval e b 
@@ -112,7 +105,6 @@ module Evaluation where
             (LambdaE x e1) -> do 
                 let newExp = (replaceVar x (varToLoc l) e1)
                 eval newExp b
-                --return w'
             _ -> error "App body is not a lambda."
 
     eval (MatchE e0 NilE e1 (ConsE xh xt) e2) b = do 
