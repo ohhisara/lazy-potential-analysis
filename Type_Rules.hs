@@ -11,6 +11,7 @@ type (Subst a) = Map.Map VariableT (Type a)
 type HMSubst = Subst ()
 
 type EnvT = Map.Map VariableT HMType
+--type EnvT = [(VariableT, HMType)]
 
 -- a monad for Hindler-Milner type inference/checking 
 -- combination of state and failure 
@@ -34,11 +35,9 @@ lookupEnv x env = case (Map.lookup x env) of
     Nothing -> do 
       s <- gets unifier
       throwError ("unbound variable: " ++ show x ++ "\n Uni: " ++ show s ++  "\n Env: " ++ show env)
-    Just t -> return t
-
-
+    Just t -> return t 
 --------------------- Unification
-unify::HMType -> HMType -> TC ()
+unify :: HMType -> HMType -> TC ()
 unify t1 t2 | trace ("Unify: T1 - " ++ show t1 ++ " T2 - " ++ show t2) False = undefined
 unify t1 t2 = do 
     u <- gets unifier

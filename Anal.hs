@@ -85,16 +85,16 @@ decorateType k (List t _ _)
 
 
 ----------------------- Structural type rules
-prepay :: AEnv -> AEnv -> AnnType -> AnnType -> Ann -> Ann -> CLP ()
-prepay [] env e t' p p' = a_infer env e t' p p'
-prepay ((x,(Thunk t q)) : ctx1) ctx2 e t' p p'
+prepay ::Degree -> AEnv -> AEnv -> Expression -> AnnType -> Ann -> Ann -> CLP ()
+prepay k [] env e t' p p' = a_infer k env e t' p p'
+prepay k ((x,(Thunk t q)) : ctx1) ctx2 e t' p p'
   = do q0 <- freshAnn
        q1 <- freshAnn
        p0 <- freshAnn
        var q `equal` (var q0 + var q1)
        var p `equal` (var p0 + var q1)
-       prepay ctx1 ((x,(Thunk t q0)):ctx2) e t' p0 p'
-prepay ctx _ e t' p p'
+       prepay k ctx1 ((x,(Thunk t q0)):ctx2) e t' p0 p'
+prepay k ctx _ e t' p p'
   = error ("aa_infer_prepay: invalid context\n " ++ show ctx)
 
 -----------------------Share relation
@@ -118,7 +118,64 @@ share (List t1 a l) ts =  sequence_ [ do { var i `geq` var a
                     }
                | List ti i li <- ts] -- o que faz isto??  -}
 share _ _ = error ("type mismatch share")
-        
+
+
+lookupEnv::AEnv -> VariableT -> AnnType
+lookupEnv [] x = error "variable not in scope" 
+lookupEnv ((v,t):xs)  x 
+  | v == x = t 
+  | otherwise = Anal.lookupEnv xs x
+
+-- as above but enforces sharing and returns remaining context
+lookupShare :: Degree -> VariableT -> AEnv -> CLP (AnnType,AEnv)
+lookupShare k x env
+  = case span (\(x',_) -> x'/=x) env of
+    (_, []) -> error ("unbound identifier: "++show x)
+    (env', (_,t):env'') -> do t1 <-decorateType k t
+                              t2 <- decorateType k t
+                              share t [t1,t2]
+                              return (t1, env' ++ (x,t2):env'')
 ---------------- Inference 
-a_infer :: AEnv -> AnnType -> AnnType -> Ann -> Ann -> CLP ()
-a_infer a b c d e = return ()
+a_infer ::Degree -> AEnv -> EnvT -> Expression -> AnnType -> Ann -> Ann -> CLP ()
+a_infer k envA envT (NilE) t p p'  = return ()
+a_infer k envA envT (ConstE _) t p p'  = return ()
+
+a_infer k envA envT (VarE v) t (Ann p) p' = do
+  let t1 = Anal.lookupEnv env v in 
+    case t1 of 
+      (Thunk tp a) -> do 
+        if (t == t1) then do 
+          var a `equalTo` p
+          var p' `equalTo` 0
+        else error "type mismatch"
+      _ -> error "type mismatch"
+
+a_infer k envA envT (LambdaE v e) (Func t t' q) p p' = do
+  var p `geq` var p'
+  var p' `equalTo` 0
+  prepay k [(v,t)] env e t' q (Ann 0)
+
+a_infer k envA envT (AppE e x) t p p' = do
+  t0 <- Type_Rules.infer env e
+  case t0 of 
+    (Func t' t'' q) -> do 
+      var p `geq` var p'
+      (ty, ctx') <- lookupShare k x env 
+      pe <- freshAnn
+      return ()
+    _ -> do 
+      var p `geq` var p'
+      return ()
+
+  
+        {-- pe' <- fresh_ann
+        aa_infer ctx' e te pe p'
+        -- allow subtyping the argument and result
+        ty `subtype` t'
+        t `subtype` t0
+        k <- askC costApp
+        ((var p - var pe) - var q) `equalTo` k
+        -- allow relaxing
+        -- (var p, var p') `relaxcost` (var pe ^+^ var q, var pe')  -}
+  
+
