@@ -7,23 +7,25 @@ import qualified Data.Map as Map
 
 newtype Location = Location Int deriving (Eq, Ord, Num)
 instance Show Location where
-    show (Location n) = 'l' : (show n)
+     show (Location n) = 'l' : (show n)
 
-newtype Variable = Variable Int deriving (Eq, Ord, Num)
-instance Show Variable where
-    show (Variable n) = 'v' : (show n)
+-- newtype Variable = Variable Int deriving (Eq, Ord, Num)
+-- instance Show Variable where
+--     show (Variable n) = 'v' : (show n)
 
 newtype Ann = Ann Int deriving (Eq, Ord, Num, Enum)
 instance Show Ann where
     show (Ann n) = 'a' : (show n)
 
+
 type VariableT = String 
 data Expression = NilE 
      | ConstE Int
-     | VarE VariableT
+     | VarE VariableT --because it could be VariableT or Location
      | LambdaE VariableT Expression 
      | AppE Expression VariableT
      | LetE VariableT Expression Expression
+     | PairE VariableT VariableT
      | ConsE VariableT VariableT
      | LetconsE VariableT Expression Expression
      | MatchE Expression Expression Expression Expression Expression
