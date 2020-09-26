@@ -2,13 +2,15 @@
 
 ## To run:
 
-1. Compile
+1. Choose degree in function *analyse* in Main.hs
+```haskell
+aa_inference [degree] opts e t
+
+2. Compile
 ```bash
-stack ghci Main.hs
+stack ghc Main.hs
 ```
 
-2. In function *main* in Main.hs choose one the following available programs: app'; attach; pairs; ann_pairs.
-
-3. Run *main* function
-```ghc
-main
+3. Run *main* function with argument from examples
+```bash
+./Main <example_file.in>
