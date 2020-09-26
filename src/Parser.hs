@@ -103,61 +103,45 @@ term = do { reservedOp "\\"
               ; x <- identifier
               ; ann <- maybe id Coerce <$> optionMaybe type_annotation
               ; reservedOp "="
-              ; c <- capitalIdent
-              ; ys <- parens (identifier `sepBy` comma)
+              ; c1 <- identifier
+              ; c2 <- identifier
               ; reserved "in"
               ; e2 <- appterm
-              ; return (Let x (ann $ ConsApp c ys) e2)
+              ; return (Let x (ann $ ConsApp c1 c2) e2)
               }
        <|> do { reserved "match"
               ; e <- appterm
               ; reserved "with"
-              ; alts <- match_alt `sepBy1` bar
-              ; other <- optionMaybe 
-                         (do { reserved "otherwise"; appterm })
-              ; return (Match e alts other) 
-              } 
-       <|> do { reserved "if"
+              ; c1 <- identifier
+              ; c2 <- identifier
               ; e1 <- appterm
-              ; reserved "then"
+              ; reserved "|"
               ; e2 <- appterm
-              ; reserved "else"
-              ; e3 <- appterm
-              ; return (Match e1 [("True",[],e2),
-                                  ("False",[],e3)] Nothing)
-              }
+              ; ann <- maybe id Coerce <$> optionMaybe type_annotation
+              ; return (Match e (ann $ ConsApp c1 c2) e1 Nil e2) 
+              } 
        <|> do { x <- identifier
               ; return (Var x)
               }
        <|> do { n <- integer
               ; return (Const n)
               }
-       <|> do { c <- capitalIdent
+       <|> do { n <- reserved "Nil"
+              ; return Nil
+              }
+       <|> do { c1 <- capitalIdent
+              ; c2 <- capitalIdent
               ; ys <- parens (identifier `sepBy` comma)
-              ; return (ConsApp c ys)
+              ; return (ConsApp c1 c2)
               }
        <|> parens appterm
        
-       
--- match alternative
-match_alt = do { c <- capitalIdent
-               ; xs <- parens (identifier `sepBy` comma)
-               ; reservedOp "->"
-               ; e <- appterm
-               ; return (c,xs,e)
-               }
-
 
 -- sequence of applications
-appterm = try (do { x <- identifier
-                  ; op <- operator
-                  ; y <- identifier
-                  ; return (PrimOp op x y)
-                  } <?> "primop")
-          <|> do { e <- term
+appterm = try (do { e <- term
                  ; ys<- many identifier
                  ; return (foldl App e ys)
-                 } 
+                 }) 
           <?> "application"
           
 
@@ -198,22 +182,10 @@ type_base = do { reserved "T"
                ; t <- parens type_expr
                ; return (TyThunk p t)
                }
-            <|> do { reserved "Rec"
-                   ;  alts <- braces (type_alt `sepBy1` bar)
-                   ; return (TyRec alts)
-                   }
             <|> do { c <- capitalIdent; return (TyCon c) }
             <|> do { v <- identifier; return (TyVar v) }
-            <|> do { reservedOp "#"; return TySelf }
             <|> parens type_expr
             
-
-type_alt = do { c <- capitalIdent
-              ; q <- opt_ann
-              ; colon
-              ; ts <- parens (type_expr `sepBy` comma)
-              ; return (c,q,TyTup ts)
-              }
 
 -- optional annotation 
 -- generates a fresh name 

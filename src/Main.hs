@@ -6,7 +6,7 @@ module Main where
 
 import           Term
 import Types
---import           Parser
+import           Parser
 import           DamasMilner
 import           Analysis
 import           Options
@@ -18,45 +18,24 @@ import           System.Environment
 import           Data.LinearProgram
 import qualified Data.Map as Map
  
-      
--- main k = do arg0 <- getProgName 
---           argv <- getArgs
---           (opts, argv') <- parseOpts arg0 argv
---           case argv' of
---             [] ->  do txt<-getContents
---                       analyse k opts (runParser toplevel 0 "stdin" txt)
---             (f:_) -> do txt<-readFile f 
---                         analyse k opts (runParser toplevel 0 f txt)
+main = do arg0 <- getProgName 
+          argv <- getArgs
+          (opts, argv') <- parseOpts arg0 argv
+          case argv' of
+            [] ->  do txt<-getContents
+                      analyse opts (runParser toplevel 0 "stdin" txt)
+            (f:_) -> do txt<-readFile f 
+                        analyse opts (runParser toplevel 0 f txt)
                
 
--- analyse k opts (Left err) = print err >> exitFailure
--- analyse k opts (Right e') 
---   = case hm_inference e' of
---   Right (e :@ t) -> do 
---           putStrLn ""
---           putStrLn "-- Amortised type analysis " 
---           putStrLn ("-- Cost model: " ++ show (costName $ optCostModel opts))
---           let (typ, lp) = aa_inference k opts e t
---           putStrLn "-- LP metrics follow"
---           putStrLn ("--  # constraints: " ++ show (length $ constraints lp))
---           putStrLn ("--  # variables  : " ++ show (Map.size $ allVars lp))
---           putStrLn ""
---           putStrLn "-- Invoking LP solver"
---           typ' <- aa_solve (typ,lp)
---           putStrLn "\n-- Annotated typing"
---           print typ'
---   Left err -> putStrLn err >> exitFailure
--- (Let "f" (Const 1) (Let "n" Nil (Let "x" (ConsApp "f" "n") (Match (Term.Var "x") (ConsApp "x1" "x2") (Term.Var "x") (Nil) (Nil) ))))
-main =
-  case hm_inference app' of 
-    Right (e :@ t) -> do 
-          print e 
-          print t
+analyse opts (Left err) = print err >> exitFailure
+analyse opts (Right e') 
+  = case hm_inference e' of
+  Right (e :@ t) -> do 
           putStrLn ""
           putStrLn "-- Amortised type analysis " 
-          putStrLn ("-- Cost model: " ++ show (costName $ optCostModel Options.defaultOptions))
-          let (typ, lp) = aa_inference 2 Options.defaultOptions e t
-          print typ
+          putStrLn ("-- Cost model: " ++ show (costName $ optCostModel opts))
+          let (typ, lp) = aa_inference 2 opts e t
           putStrLn "-- LP metrics follow"
           putStrLn ("--  # constraints: " ++ show (length $ constraints lp))
           putStrLn ("--  # variables  : " ++ show (Map.size $ allVars lp))
@@ -65,7 +44,27 @@ main =
           typ' <- aa_solve (typ,lp)
           putStrLn "\n-- Annotated typing"
           print typ'
-    Left err -> putStrLn err >> exitFailure
+  Left err -> putStrLn err >> exitFailure
+
+-- main =
+--   case hm_inference new_pairs of 
+--     Right (e :@ t) -> do 
+--           print e 
+--           print t
+--           putStrLn ""
+--           putStrLn "-- Amortised type analysis " 
+--           putStrLn ("-- Cost model: " ++ show (costName $ optCostModel Options.defaultOptions))
+--           let (typ, lp) = aa_inference 2 Options.defaultOptions e t
+--           print typ
+--           putStrLn "-- LP metrics follow"
+--           putStrLn ("--  # constraints: " ++ show (length $ constraints lp))
+--           putStrLn ("--  # variables  : " ++ show (Map.size $ allVars lp))
+--           putStrLn ""
+--           putStrLn "-- Invoking LP solver"
+--           typ' <- aa_solve (typ,lp)
+--           putStrLn "\n-- Annotated typing"
+--           print typ'
+--     Left err -> putStrLn err >> exitFailure
 
 
 attach = (Let "attach" (Lambda "n" (Lambda "l" (Match (Term.Var "l") (ConsApp "x" "xs") (Let "p" (Pair "x" "n") (Let "f" (App (App (Term.Var "attach") "n") "xs") (ConsApp "p" "f"))) (Nil) (Nil) ))) (Term.Var "attach"))
