@@ -1,0 +1,24 @@
+name:                lazy-potential-analysis
+version:             0.1
+author:              "Sara Moreira"
+
+dependencies:
+- base >= 4.7 && < 5
+- mtl
+- transformers
+- containers
+- parsec
+- pretty
+- glpk-hs
+- gasp
+
+executables:
+  runanalysis:
+    main:                Main.hs
+    source-dirs:         src
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -W
+    
+
