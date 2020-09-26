@@ -1,0 +1,8 @@
+-- new_pairs = (Coerce Main.constrain (Let "attach" (Lambda "n" (Lambda "l" (Match (Term.Var "l") (ConsApp "x" "xs") (Let "p" (Pair "x" "n") (Let "f" (App (App (Term.Var "attach") "n") "xs") (ConsApp "p" "f"))) (Nil) (Nil) ))) (Let "app'" (Lambda "l1" (Lambda "l2" (Match (Term.Var "l2") (ConsApp "x1" "xs1") (Let "fn" (App (App (Term.Var "app'") "l1") ("xs1")) (ConsApp "x1" "fn")) (Nil) (Term.Var "l1"))) ) (Let "pairs" (Lambda "list" (Match (Term.Var "list") (ConsApp "x2" "xs2" ) (Let "f1" (App (Term.Var "pairs") "xs2") (Let "f2" (App (App (Term.Var "attach") "x2") "xs2") (App (App (Term.Var "app'") "f1") "f2"))) (Nil) (Nil))) (Term.Var "pairs")))))
+
+-- uau :: LinFunc Ann Int
+-- uau = linCombination []
+
+-- hm= (Constr Nothing (linCombination [(1, "a304")]) (Equ 1))
+
+-- constrain = ((Types.TyFun "a302" (Types.TyThunk "a303" (Types.TyList "a304" ["a305","a306"] (Types.TyVar "t1"))) (Types.TyList "a307" ["a308","a309"] (Types.TyThunk "a310" (Types.TyThunk "a311" (Types.TyPair (Types.TyThunk "a313" (Types.TyVar "t1")) (Types.TyThunk "a314" (Types.TyVar "t1"))))))), [hm])

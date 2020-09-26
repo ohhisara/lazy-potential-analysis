@@ -1,9 +1,0 @@
-
-let length
-  = \xs -> match xs with
-      Nil() -> 0
-    | Cons(x, xs') -> let one = 1 in
-                      let len' = length xs' 
-                      in one + len'
-in
-length

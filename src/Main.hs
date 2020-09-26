@@ -67,26 +67,14 @@ main =
           print typ'
     Left err -> putStrLn err >> exitFailure
 
--- attach = λn. λl . match l k 1 with
--- nil->nil
--- cons(x, xs j 1 )-> let p = (x, n); f = attach n xs n 1
--- in cons(p, f )
 
 attach = (Let "attach" (Lambda "n" (Lambda "l" (Match (Term.Var "l") (ConsApp "x" "xs") (Let "p" (Pair "x" "n") (Let "f" (App (App (Term.Var "attach") "n") "xs") (ConsApp "p" "f"))) (Nil) (Nil) ))) (Term.Var "attach"))
 
 app' = (Let "app'" (Lambda "l1" (Lambda "l2" (Match (Term.Var "l2") (ConsApp "x" "xs") (Let "f" (App (App (Term.Var "app'") "l1") ("xs")) (ConsApp "x" "f")) (Nil) (Term.Var "l1"))) ) (Term.Var "app'"))
 
---attach_app = (Let "attach" (Lambda "n" (Lambda "l" (Match (Term.Var "l") (ConsApp "x" "xs") (Let "p" (ConsApp "x" "n") (Let "f" (App (Term.Var "n") "xs") (ConsApp "p" "f"))) (Nil) (Nil) ))) (Let "app'" (Lambda "l1" (Lambda "l2" (Match (Term.Var "l2") (ConsApp "x" "xs") (Let "f" (App (App (Term.Var "app'") "l1") ("xs")) (ConsApp "x" "f")) (Nil) (Var "l1"))) ) (Term.Var "app'")))
-
---(Let "pairs "(Lambda "list" (Match (Term.Var "list") (ConsApp "x2" "xs2" ) (Let "f1" (App (Var "pairs") "xs2") (Let "f2" (App (App (Var "attach") "x2") "xs2") (App (App (Term.Var "f1") "f1") "f2")) (Nil) (Nil))) (Term.Var "pai"))
-
---(Let "attach" (Lambda "n" (Lambda "l" (Match (Term.Var "l") (ConsApp "x" "xs") (Let "p" (ConsApp "x" "n") (Let "f" (App (Term.Var "n") "xs") (ConsApp "p" "f"))) (Nil) (Nil) ))) (Let "app'" (Lambda "l1" (Lambda "l2" (Match (Term.Var "l2") (ConsApp "x1" "xs1") (Let "fn" (App (App (Term.Var "app'") "l1") ("xs1")) (ConsApp "x1" "fn")) (Nil) (Term.Var "l1"))) ) (Let "pairs "(Lambda "list" (Match (Term.Var "list") (ConsApp "x2" "xs2" ) (Let "f1" (App (Term.Var "pairs") "xs2") (Let "f2" (App (App (Term.Var "attach") "x2") "xs2") (App (App (Term.Var "app'") "f1") "f2"))) (Nil) (Nil))) (Term.Var "pairs"))))
-
 pairs = (Let "attach" (Lambda "n" (Lambda "l" (Match (Term.Var "l") (ConsApp "x" "xs") (Let "p" (Pair "x" "n") (Let "f" (App (App (Term.Var "attach") "n") "xs") (ConsApp "p" "f"))) (Nil) (Nil) ))) (Let "app'" (Lambda "l1" (Lambda "l2" (Match (Term.Var "l2") (ConsApp "x1" "xs1") (Let "fn" (App (App (Term.Var "app'") "l1") ("xs1")) (ConsApp "x1" "fn")) (Nil) (Term.Var "l1"))) ) (Let "pairs" (Lambda "list" (Match (Term.Var "list") (ConsApp "x2" "xs2" ) (Let "f1" (App (Term.Var "pairs") "xs2") (Let "f2" (App (App (Term.Var "attach") "x2") "xs2") (App (App (Term.Var "app'") "f1") "f2"))) (Nil) (Nil))) (Term.Var "pairs"))))
 
 pairs1 = (Let "pairs" (Lambda "list" (Match (Term.Var "list") (ConsApp "x2" "xs2" ) (Let "f1" (App (Term.Var "pairs") "xs2") (Let "f2" (App (App (Term.Var "attach") "x2") "xs2") (App (App (Term.Var "app'") "f1") "f2"))) (Nil) (Nil))) (Term.Var "pairs"))
-
---(TyTyhunk 0 (TyFun 0 (TyThunk 0 (TyVar "t1")) (TyFun 0 (TyThunk 0 (TyList 0 [1,0] (TyVar "t4"))) (TyList 0 [0,0] (TyThunk (0) (TyVar "t4"))))))
 
 new_pairs = (Coerce Main.constrain (Let "attach" (Lambda "n" (Lambda "l" (Match (Term.Var "l") (ConsApp "x" "xs") (Let "p" (Pair "x" "n") (Let "f" (App (App (Term.Var "attach") "n") "xs") (ConsApp "p" "f"))) (Nil) (Nil) ))) (Let "app'" (Lambda "l1" (Lambda "l2" (Match (Term.Var "l2") (ConsApp "x1" "xs1") (Let "fn" (App (App (Term.Var "app'") "l1") ("xs1")) (ConsApp "x1" "fn")) (Nil) (Term.Var "l1"))) ) (Let "pairs" (Lambda "list" (Match (Term.Var "list") (ConsApp "x2" "xs2" ) (Let "f1" (App (Term.Var "pairs") "xs2") (Let "f2" (App (App (Term.Var "attach") "x2") "xs2") (App (App (Term.Var "app'") "f1") "f2"))) (Nil) (Nil))) (Term.Var "pairs")))))
 

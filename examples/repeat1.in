@@ -1,8 +1,0 @@
-
-{- 
--- infinite repeat, Knot-tying version
--}
- 
-let repeat = \x -> letcons xs = Cons(x,xs) 
-		in xs
-in repeat
