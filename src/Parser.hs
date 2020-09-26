@@ -1,7 +1,6 @@
 --
 -- Parser for minimal lazy language
--- Pedro Vasconcelos, 2012
---
+-- TODO: Add Pairs
 module Parser where
 
 import           Prelude hiding (Num(..))
