@@ -60,7 +60,6 @@ parensIf False = id
 
 -- | pretty-printing terms
 prettyTerm :: Pretty a => Int -> Term a -> Doc
-prettyTerm _ (Ind x) = text ('^':x)
 prettyTerm _ (Var x) = text x
 prettyTerm p (Lambda x e)
   = parensIf (p>3) $ 
@@ -73,8 +72,8 @@ prettyTerm p (Lambda x e)
 
 
 prettyTerm p (App e y) = prettyTerm 4 e <+> text y
-prettyTerm p (ConsApp c ys) 
-  = ppConsApp c ys 
+-- prettyTerm p (ConsApp c1 c2) 
+--   = ppConsApp c1 c2 
 prettyTerm p (Let x (e1 :@ a) e2)
   = parensIf (p>3) $
     fsep [ text "let", text x, colon, pretty a,
@@ -87,25 +86,24 @@ prettyTerm p (Let x e1 e2)
           nest 2 (fsep [equals, prettyTerm 0 e1]), 
           text "in", prettyTerm 2 e2
          ]
-prettyTerm p (Match e (alt0:alts) other)    
-  = parensIf (p>3) $
-    fsep ([text "match", prettyTerm 0 e, text "with"] 
-          ++
-          ppalt0 : map ppalt alts 
-          ++
-          --sep (punctuate (char '|') $ map (nest 2 . ppalt) alts),
-         maybe [] (\e' -> [text "otherwise", prettyTerm 0 e']) other
-         )
-      where ppalt (c,xs,e) 
-              = fsep [char '|' <+> ppConsApp c xs <+> text "->",
-                      nest 2 (prettyTerm 2 e)]
-            ppalt0 = 
-              let (c,xs,e) = alt0 in
-              fsep [ppConsApp c xs <+> text "->", 
-                    nest 2 (prettyTerm 2 e)]
+-- prettyTerm p (Match e (alt0:alts) other)    
+--   = parensIf (p>3) $
+--     fsep ([text "match", prettyTerm 0 e, text "with"] 
+--           ++
+--           ppalt0 : map ppalt alts 
+--           ++
+--           --sep (punctuate (char '|') $ map (nest 2 . ppalt) alts),
+--          maybe [] (\e' -> [text "otherwise", prettyTerm 0 e']) other
+--          )
+--       where ppalt (c,xs,e) 
+--               = fsep [char '|' <+> ppConsApp c xs <+> text "->",
+--                       nest 2 (prettyTerm 2 e)]
+--             ppalt0 = 
+--               let (c,xs,e) = alt0 in
+--               fsep [ppConsApp c xs <+> text "->", 
+--                     nest 2 (prettyTerm 2 e)]
                              
 prettyTerm p (Const n) = text (show n)                             
-prettyTerm p (PrimOp op x y) = hsep [text x, text op, text y]
 
 prettyTerm p (Coerce (t,cs) e) -- TODO: fix this!
   = prettyTerm p e
@@ -113,10 +111,7 @@ prettyTerm p (e :@ a)
   = fsep [prettyTerm p e, colon, pretty a]
 
 
-prettyTerm p (Ind x) = ppConsApp "ind" [x]
-
-
-ppConsApp c xs = text c <> parens (hcat $ punctuate comma (map text xs))
+-- ppConsApp c1 c2 = text c <> parens (hcat $ punctuate comma (map text xs))
 
 
 
@@ -124,7 +119,6 @@ ppConsApp c xs = text c <> parens (hcat $ punctuate comma (map text xs))
 prettyType :: ShowA a => Int -> TyExp a -> Doc
 prettyType _ (TyVar v) = text v
 prettyType _ (TyCon c) = text c
-prettyType _ TySelf    = char '#'
 prettyType _ (TyThunk q t) 
   = text ("T" ++ showA q) <> parens (prettyType 0 t)
     
@@ -133,12 +127,6 @@ prettyType p (TyFun q t1 t2)
     fsep [prettyType 4 t1, 
           nest 2 (ppArrow q), 
           nest 2 (prettyType 3 t2)]
-prettyType _ (TyTup ts) 
-  = parens (fcat $ punctuate comma $ map (prettyType 0) ts)
-prettyType _ (TyRec alts)
-  = text "Rec" <> braces (fsep $ intersperse (char '|') $ map p alts)
-  where p (c, q, t) = hcat [text (c ++ showA q), colon,
-                            prettyType 0 t]
 
 ppArrow q =  text ("->" ++ showA q)
 
@@ -164,8 +152,8 @@ varnames :: [String]
 varnames = let singles = "abc"
            in [[v] | v<-singles] ++ [v:show n | n<-[1..], v<-singles]
                             
-instance ShowA a => Show (Typing a) where
-  show t = render (pretty t)
+-- instance ShowA a => Show (Typing a) where
+--   show t = render (pretty t)
 
 
 

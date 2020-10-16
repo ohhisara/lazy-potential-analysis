@@ -193,16 +193,16 @@ share (TyList a1 l1 t) ts = do
                     ; share t [ti] 
                    }
                 | TyList ai _ ti <- ts]
-  share_potential l1 (gather_all ts)
+  share_potential l1 (gather_all_potential ts)
   
 
 -- gather_potential_single:: Atype -> [Ann]
 -- gather_potential_single (TyList ai (l1:xsi) ti)= l1:(gather_potential ti)
 
 -- | to collect potential from list of lists
-gather_all::[Atype] -> [[Ann]]
-gather_all [] = []
-gather_all l = (gather_potential l):(gather_all (shift_right l))
+gather_all_potential::[Atype] -> [[Ann]]
+gather_all_potential [] = []
+gather_all_potential l = (gather_potential l):(gather_all_potential (shift_right l))
 
 gather_potential::[Atype] -> [Ann]
 gather_potential []= []
@@ -213,7 +213,7 @@ share_potential::[Ann] -> [[Ann]] -> CLP ()
 share_potential _ [] = return ()
 share_potential [] _ = return ()
 share_potential (a:as) (l:ls) = do 
-  var a `geq` vars l
+  (var a  `geq` vars l)
   share_potential as ls
 
 share_potential_simple::[Ann] -> [Ann] -> [Ann]-> CLP ()
@@ -366,10 +366,6 @@ aa_infer k ctx (Var x) t p p'
 aa_infer k ctx (Lambda x e) (TyFun q t t') p p'
   = do share_self (trim_context e ctx)
        var p `geq` var p' -- allow relaxing
-      --  let potential = look_for_potential t'
-      --  new_type <- decorate_type k t
-      --  t1 <- out_potential k new_type potential
-      --  t `subtype` t1
        aa_infer_prepay k [(x,t)] ctx e t' q zero_ann
 
 
@@ -443,9 +439,10 @@ aa_infer k ctx (ConsApp x1 x2) (TyList a p t) z z'
      case tx1 of
        TyThunk q ttype -> do
          case tx2 of 
-            TyThunk ta (TyList an po ty) -> do 
+            TyThunk ann (TyList an po ty) -> do 
               additive_shift p po
-              (TyList an po ty) `subtype` (TyList a p t)
+              (var ann - var an) `equalTo` 0
+              --(TyList an po ty) `subtype` (TyList a p t)
               ttype `equaltype` ty
             _ -> error "hmmmmmmmmmm"
        _ -> error "aiai"
@@ -567,18 +564,7 @@ aa_infer_prepay k ((x,TyThunk q t) : ctx1) ctx2 e t' p p'
        aa_infer_prepay k ctx1 ((x,TyThunk q0 t):ctx2) e t' p0 p'
 aa_infer_prepay k ctx _ e t' p p'
   = error ("aa_infer_prepay: invalid context\n " ++ show ctx)
-
-               
--- auxiliary Cons-rule used at the Letcons 
--- given both context *and* the result type 
--- turnstile annotations are ommitted (always 0)
--- aa_infer_cons ctx (ConsApp c ys) tB
---   | length ys == length ts'    -- should always hold
---   = do (ts, _) <- lookupMany ys ctx
---        sequence_ [t `subtype` t' | (t,t')<-zip ts ts']
---     where TyRec talts = tB    -- pattern-match result type
---           TyTup ts' = head [recsubst tB t' | (c',_,t')<-talts, c'==c]
--- aa_infer_cons ctx _ tB = error "aa_infer_cons: invalid argument"          
+ 
         
 -- lookup and share many identifiers in sequence
 lookupMany :: Degree -> [Ident] -> Acontext -> CLP ([Atype], Acontext)

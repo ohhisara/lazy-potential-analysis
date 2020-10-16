@@ -98,12 +98,24 @@ term = do { reservedOp "\\"
               ; e2 <- appterm
               ; return (Let x (ann e1) e2)
               }
+        <|> do { reserved "Pair" 
+              ; reserved "("
+              ; x1 <- identifier
+              ; reserved ","
+              ; x2 <- identifier
+              ; reserved ")"
+              ; return (Pair x1 x2)
+              }
        <|> do { reserved "letcons"
               ; x <- identifier
               ; ann <- maybe id Coerce <$> optionMaybe type_annotation
               ; reservedOp "="
+              ; reserved "Cons"
+              ; reserved "("
               ; c1 <- identifier
+              ; reserved ","
               ; c2 <- identifier
+              ; reserved ")"
               ; reserved "in"
               ; e2 <- appterm
               ; return (Let x (ann $ ConsApp c1 c2) e2)
@@ -111,10 +123,16 @@ term = do { reservedOp "\\"
        <|> do { reserved "match"
               ; e <- appterm
               ; reserved "with"
+              ; reserved "Cons"
+              ; reserved "("
               ; c1 <- identifier
+              ; reserved ","
               ; c2 <- identifier
+              ; reserved ")"
+              ; reserved "->"
               ; e1 <- appterm
               ; reserved "|"
+              ; reserved "Nil ->"
               ; e2 <- appterm
               ; ann <- maybe id Coerce <$> optionMaybe type_annotation
               ; return (Match e (ann $ ConsApp c1 c2) e1 Nil e2) 
@@ -128,9 +146,12 @@ term = do { reservedOp "\\"
        <|> do { n <- reserved "Nil"
               ; return Nil
               }
-       <|> do { c1 <- capitalIdent
-              ; c2 <- capitalIdent
-              ; ys <- parens (identifier `sepBy` comma)
+       <|> do {reserved "Cons"
+              ; reserved "("
+              ; c1 <- identifier
+              ; reserved ","
+              ; c2 <- identifier
+              ; reserved ")"
               ; return (ConsApp c1 c2)
               }
        <|> parens appterm

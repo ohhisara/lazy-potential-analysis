@@ -8,10 +8,10 @@ aa_inference [degree] opts e t
 ```
 2. Compile
 ```bash
-stack ghc Main.hs
+stack install
 ```
 
-3. Run *main* function with argument from examples
+3. Run analysis with argument from examples
 ```bash
-./Main <example_file.in>
+runanalysis <example_file.in>
 ```

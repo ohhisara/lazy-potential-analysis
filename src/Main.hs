@@ -44,10 +44,10 @@ analyse opts (Right e')
           typ' <- aa_solve (typ,lp)
           putStrLn "\n-- Annotated typing"
           print typ'
-  Left err -> putStrLn err >> exitFailure
+  Left err -> putStrLn err >> exitFailure 
 
 -- main =
---   case hm_inference new_pairs of 
+--   case hm_inference pairs of 
 --     Right (e :@ t) -> do 
 --           print e 
 --           print t
