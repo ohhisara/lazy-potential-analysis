@@ -22,12 +22,28 @@ instance ShowA Ann where
   showA a     = "@" ++ show a
   showAs a a' = "@" ++ show a ++ "/" ++ show a'
 
+-- | typeclass to overload showing of potential
+-- class ShowP a where
+--   showP :: a -> String        -- a single annotation 
+  
+-- instance ShowP () where
+--   ShowP _ = ""
+
+-- instance ShowP [Ann] where
+--   showP p = showPotential p
+
+
+-- showPotential::[Ann] -> String 
+-- showPotential (a1:[]) = (show a1) ++ ")"
+-- showPotential (a1:as) = "(" ++ (show a1) ++ "," ++ (ShowP as)
+
 instance ShowA Double where
   showA q = if iszero q then "" else "@" ++ showRound q
   showAs q q'
       | iszero q && iszero q' = ""
       | otherwise =  "@" ++ showRound q ++ "/" ++ showRound q'
 
+-- s
 
 showRound :: Double -> String
 showRound x = let r = round x :: Int
@@ -61,6 +77,7 @@ parensIf False = id
 -- | pretty-printing terms
 prettyTerm :: Pretty a => Int -> Term a -> Doc
 prettyTerm _ (Var x) = text x
+prettyTerm _ Nil = text "Nil"
 prettyTerm p (Lambda x e)
   = parensIf (p>3) $ 
     fsep [char '\\' <> hsep (map text (x:args e)), text "->", 
@@ -72,8 +89,10 @@ prettyTerm p (Lambda x e)
 
 
 prettyTerm p (App e y) = prettyTerm 4 e <+> text y
--- prettyTerm p (ConsApp c1 c2) 
---   = ppConsApp c1 c2 
+prettyTerm p (ConsApp c1 c2) 
+  = ppConsApp c1 c2 
+prettyTerm p (Pair c1 c2) 
+  = ppPair c1 c2 
 prettyTerm p (Let x (e1 :@ a) e2)
   = parensIf (p>3) $
     fsep [ text "let", text x, colon, pretty a,
@@ -86,22 +105,17 @@ prettyTerm p (Let x e1 e2)
           nest 2 (fsep [equals, prettyTerm 0 e1]), 
           text "in", prettyTerm 2 e2
          ]
--- prettyTerm p (Match e (alt0:alts) other)    
---   = parensIf (p>3) $
---     fsep ([text "match", prettyTerm 0 e, text "with"] 
---           ++
---           ppalt0 : map ppalt alts 
---           ++
---           --sep (punctuate (char '|') $ map (nest 2 . ppalt) alts),
---          maybe [] (\e' -> [text "otherwise", prettyTerm 0 e']) other
---          )
---       where ppalt (c,xs,e) 
---               = fsep [char '|' <+> ppConsApp c xs <+> text "->",
---                       nest 2 (prettyTerm 2 e)]
---             ppalt0 = 
---               let (c,xs,e) = alt0 in
---               fsep [ppConsApp c xs <+> text "->", 
---                     nest 2 (prettyTerm 2 e)]
+prettyTerm p (Match e0 (ConsApp c1 c2) e2 e3 e4)    
+  = parensIf (p>3) $
+    fsep ([text "match", prettyTerm 0 e0, text "with"] 
+          ++
+          [char '|' <+> (ppConsApp c1 c2) <+> text "->",
+                      nest 2 (prettyTerm 2 e2)]
+          ++
+          --sep (punctuate (char '|') $ map (nest 2 . ppalt) alts),
+        [char '|' <+> text "Nil" <+> text "->",
+                      nest 2 (prettyTerm 2 e4) ]) 
+         
                              
 prettyTerm p (Const n) = text (show n)                             
 
@@ -111,7 +125,8 @@ prettyTerm p (e :@ a)
   = fsep [prettyTerm p e, colon, pretty a]
 
 
--- ppConsApp c1 c2 = text c <> parens (hcat $ punctuate comma (map text xs))
+ppConsApp c1 c2 = text "Cons" <> parens (hcat $ punctuate comma (map text [c1,c2]))
+ppPair c1 c2 = text "P" <> parens (hcat $ punctuate comma (map text [c1,c2]))
 
 
 
@@ -127,8 +142,11 @@ prettyType p (TyFun q t1 t2)
     fsep [prettyType 4 t1, 
           nest 2 (ppArrow q), 
           nest 2 (prettyType 3 t2)]
-
+prettyType _ (TyPair t1 t2) = text "P" <> parens  ((prettyType 0 t1) <> comma <> (prettyType 0 t2))
+prettyType _ (TyList q p t) = text ("L" ++ showA q ) <> parens (prettyType 0 t)
 ppArrow q =  text ("->" ++ showA q)
+
+
 
 
 
@@ -152,8 +170,8 @@ varnames :: [String]
 varnames = let singles = "abc"
            in [[v] | v<-singles] ++ [v:show n | n<-[1..], v<-singles]
                             
--- instance ShowA a => Show (Typing a) where
---   show t = render (pretty t)
+instance ShowA a => Show (Typing a) where
+  show t = render (pretty t)
 
 
 

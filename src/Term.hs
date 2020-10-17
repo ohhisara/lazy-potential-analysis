@@ -10,7 +10,6 @@ import           Data.LinearProgram hiding (Var)
 -- import           Data.List
 import           Data.Set (Set)
 import qualified Data.Set as Set
-
 -- | identifiers 
 type Ident = String
 
@@ -49,7 +48,7 @@ data Typing a
            , ann_in :: a 
            , ann_out :: a 
            }
-  deriving (Functor, Foldable, Traversable, Show)
+  deriving (Functor, Foldable, Traversable)
 
 
 -- | shorthand constructors for simple (i.e. non-annotated) terms 

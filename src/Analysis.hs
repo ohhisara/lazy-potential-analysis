@@ -6,7 +6,7 @@ module Analysis where
 
 import           Prelude hiding (Num(..))
 import           Algebra.Classes hiding (zero)
-
+import Pretty
 import           Term
 import           Types
 import           Control.Monad.State
