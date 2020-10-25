@@ -1,0 +1,5 @@
+src/*.hi
+src/*.o
+.stack-work/*
+lazy-potential-analysis.cabal
+stack.yaml.lock

@@ -1,0 +1,10 @@
+let attach = \n-> \l-> match l with 
+    Cons( x, xs) -> let p = Pair( x, n ) in let f = attach n xs in Cons( p, f) 
+    | Nil -> Nil
+    in let app' = \l1-> \l2-> match l2 with
+        Cons( x', xs') -> let f' = app' l1 xs' in Cons( x', f')
+        | Nil -> l1 
+        in let pairs = \l' -> match l' with
+            Cons( x'', xs'') -> let f1 = pairs xs'' in let f2 = attach x'' xs'' in app' f1 f2 
+            | Nil -> Nil
+            in pairs

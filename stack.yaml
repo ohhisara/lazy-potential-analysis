@@ -13,5 +13,6 @@ flags: {}
 # Extra package databases containing global packages
 extra-package-dbs: []
 
+# For Windows
 extra-lib-dirs:     ["C:\\Program Files (x86)\\winglpk-4.65\\glpk-4.65\\w64"]
 extra-include-dirs: ["C:\\Program Files (x86)\\winglpk-4.65\\glpk-4.65\\src"]
