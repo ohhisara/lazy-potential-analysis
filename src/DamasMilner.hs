@@ -183,7 +183,7 @@ hm_infer ctx (Match e0 (ConsApp x1 x2) e1 (Nil) e2)
   = do (e0' :@ t0) <- hm_infer ctx e0
        a <- freshvar
        --unify t0 (TyList () [()] (TyVar a))
-       let ctx' = (x1, nogen (hmthunk (TyVar a))):ctx
+       let ctx' = (x1, nogen ( (TyVar a))):ctx
        let ctx'' = (x2, nogen (TyThunk () (TyList () [()] (TyVar a)))):ctx'
        (e1' :@ t1) <- hm_infer ctx'' e1 
        (e2' :@ t2) <- hm_infer ctx e2
